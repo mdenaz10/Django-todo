@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Task Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #f8f9fc;
+            --success-color: #1cc88a;
+            --danger-color: #e74a3b;
+        }
+        
+        body {
+            background-color: var(--secondary-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .task-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            border-radius: 0.35rem;
+            background: white;
+            padding: 2rem;
+        }
+        
+        .task-header {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e3e6f0;
+            padding-bottom: 1rem;
+        }
+        
+        .task-item {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border-left-color: var(--primary-color);
+        }
+        
+        .completed-task {
+            background-color: rgba(28, 200, 138, 0.1);
+            border-left-color: var(--success-color);
+        }
+        
+        .task-actions .btn {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .task-item:hover .task-actions .btn {
+            opacity: 1;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: #d1d3e2;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="task-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="task-header">
+                <i class="bi bi-check-circle-fill me-2"></i>Task Manager
+            </h1>
+            <span class="badge bg-primary rounded-pill">{{ tasks.count }} tasks</span>
+        </div>
+
+        <form method="post" action="{% url 'add_task' %}" class="mb-4">
+            {% csrf_token %}
+            <div class="input-group">
+                <input type="text" name="title" class="form-control form-control-lg" 
+                       placeholder="What needs to be done?" required>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> Add Task
+                </button>
+            </div>
+        </form>
+
+        <div class="list-group">
+            {% for task in tasks %}
+                <div class="list-group-item task-item {% if task.completed %}completed-task{% endif %}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            {% if task.completed %}
+                                <i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+                                <span class="text-muted text-decoration-line-through">{{ task.title }}</span>
+                            {% else %}
+                                <i class="bi bi-circle me-3 fs-5 text-primary"></i>
+                                <span>{{ task.title }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="task-actions">
+                            {% if not task.completed %}
+                                <a href="{% url 'complete_task' task.id %}" class="btn btn-sm btn-outline-success me-1" 
+                                   title="Mark as complete">
+                                    <i class="bi bi-check-lg"></i>
+                                </a>
+                            {% endif %}
+                            <a href="{% url 'delete_task' task.id %}" class="btn btn-sm btn-outline-danger" 
+                               title="Delete task">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="text-end mt-1">
+                        <small class="text-muted">
+                            Created: {{ task.created_at|date:"M d, Y" }}
+                            {% if task.completed %}
+                                • Completed: {{ task.updated_at|date:"M d, Y" }}
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty-state">
+                    <i class="bi bi-check-all"></i>
+                    <h4>No tasks found</h4>
+                    <p>Add your first task using the form above</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
